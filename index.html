@@ -1,505 +1,593 @@
-import React, { useState } from 'react';
-import { 
-  Plane, 
-  MapPin, 
-  Coffee, 
-  Utensils, 
-  Moon, 
-  Sun, 
-  Laptop, 
-  Dumbbell, 
-  Music, 
-  Camera, 
-  Calendar, 
-  Info,
-  ChevronRight,
-  ArrowRight,
-  CheckSquare,
-  AlertTriangle,
-  FileText
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 Nomad Trip</title>
+    <!-- Tailwind CSS (樣式庫) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM (核心庫) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel (讓瀏覽器看懂 React) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* 隱藏捲軸但保留功能 */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
 
-// --- Data: 完整的行程資料庫 ---
-const scheduleData = [
-  {
-    id: 'day1',
-    date: '2/19',
-    day: '週四',
-    location: '東京',
-    theme: 'entry',
-    hotel: '三上淺草橋飯店',
-    events: [
-      { time: '09:00', endTime: '12:50', title: 'CI 0220 飛往東京', type: 'flight', location: '松山 (TSA) → 羽田 (HND)', notes: '抵達後前往飯店 Check-in' },
-      { 
-        time: '15:00', 
-        title: 'Glitch Coffee (日本橋店)', 
-        type: 'food', 
-        location: '日本橋本町 1-1-3 立石本町ビル 1F', 
-        mapUrl: 'https://maps.app.goo.gl/phFex9VWXVAtVJsm7',
-        notes: '必喝淺焙手沖，離晚餐地點很近' 
-      },
-      { 
-        time: '17:30', 
-        title: '五代目 花山烏龍麵', 
-        type: 'food', 
-        location: '日本橋店', 
-        mapUrl: 'https://maps.app.goo.gl/sMkzjHsJ3V2ecYH88',
-        notes: '建議 17:00 前往排隊，必點「鬼紐川寬麵」' 
-      },
-      { 
-        time: '20:00', 
-        title: '飯店休息', 
-        type: 'hotel', 
-        location: '三上淺草橋飯店', 
-        mapUrl: 'https://maps.app.goo.gl/Rs6CwSPm4CVYrcmZA',
-        notes: '淺草橋站附近' 
-      },
-    ]
-  },
-  {
-    id: 'day2',
-    date: '2/20',
-    day: '週五',
-    location: '東京',
-    theme: 'foodie',
-    hotel: '三上淺草橋飯店',
-    events: [
-      { time: '07:30', title: '前往 PATH 排隊', type: 'move', location: '代代木公園/富谷', notes: '排隊名店，務必提早' },
-      { 
-        time: '08:00', 
-        title: 'PATH 早餐', 
-        type: 'food', 
-        location: 'PATH', 
-        mapUrl: 'https://maps.app.goo.gl/yoXuMWKVWCMVh7529',
-        notes: '必點：荷蘭鬆餅 (Dutch Pancake)' 
-      },
-      { time: '10:30', title: '中目黑散策', type: 'activity', location: '中目黑', notes: '目黑川、星巴克臻選烘焙工坊' },
-      { time: '12:00', title: '麻布台 粋 稻葉', type: 'food', location: '麻布台之丘 Tower Plaza 3F', notes: '【已預約】午間壽司懷石' },
-      { time: '14:30', title: '麻布台之丘 & teamLab', type: 'activity', location: '麻布台之丘', notes: 'teamLab Borderless (需預約)、看東京鐵塔' },
-    ]
-  },
-  {
-    id: 'day3',
-    date: '2/21',
-    day: '週六',
-    location: '東京',
-    theme: 'leisure',
-    hotel: '三上淺草橋飯店',
-    events: [
-      { time: '上午', title: '淺草散策', type: 'activity', location: '雷門 / 仲見世通', notes: '飯店附近，輕鬆逛逛' },
-      { 
-        time: '12:00', 
-        title: '淺草今半 (國際通本店)', 
-        type: 'food', 
-        location: '台東區西淺草 3-1-12', 
-        mapUrl: 'https://www.google.com/maps/search/?api=1&query=Asakusa+Imahan+Kokusai+Dori+Honten',
-        notes: '百年壽喜燒老店，午間套餐CP值高 (建議預約)' 
-      },
-      { time: '下午', title: '最後採購 / 自由活動', type: 'activity', location: '銀座 / 澀谷', notes: '把握最後逛街時間' },
-      { time: '晚上', title: '打包行李', type: 'note', location: '飯店', notes: '⚠️ 明天去成田機場 (NRT)，查好交通！' },
-    ]
-  },
-  {
-    id: 'day4',
-    date: '2/22',
-    day: '週日',
-    location: '移動',
-    theme: 'transit',
-    hotel: 'Roomates Hostel Canggu',
-    events: [
-      { time: '07:30', title: '前往成田機場', type: 'move', location: '往 NRT', notes: '搭乘 Skyliner 或 N\'EX' },
-      { time: '10:25', title: 'OD873 飛往吉隆坡', type: 'flight', location: '成田 (NRT) → 吉隆坡 (KUL)', notes: 'Batik Air' },
-      { time: '16:55', title: '吉隆坡轉機', type: 'transit', location: 'KUL', notes: '⚠️ 轉機僅 1 小時，請衝刺！' },
-      { time: '17:55', title: 'OD157 飛往峇里島', type: 'flight', location: 'KUL → DPS', notes: '抵達峇里島 21:05' },
-      { time: '22:00', title: '前往 Canggu', type: 'move', location: 'Canggu', notes: '建議預約機場接送' },
-    ]
-  },
-  {
-    id: 'day5',
-    date: '2/23',
-    day: '週一',
-    location: '峇里島',
-    theme: 'explore',
-    hotel: 'Roomates Hostel Canggu',
-    events: [
-      { time: '上午', title: '適應放鬆', type: 'activity', location: 'Canggu', notes: '早午餐、按摩、探店' },
-      { time: '下午', title: '自由活動 (選項)', type: 'activity', location: 'Canggu Area', notes: '選項：1. Wanderlust/BYND 健身 2. Just Dance (Afro) 3. Udara Yoga' },
-      { time: '晚上', title: 'Canggu 夜生活', type: 'food', location: 'The Lawn / Old Man\'s', notes: '享受海邊氛圍' },
-    ]
-  },
-  {
-    id: 'day6',
-    date: '2/24',
-    day: '週二',
-    location: '峇里島',
-    theme: 'work',
-    hotel: 'Roomates Hostel Canggu',
-    events: [
-      { time: '06:15', title: 'Rise Run Bali 晨跑', type: 'run', location: 'The Goat Father', notes: '4km/8km 輕鬆跑，跑完喝咖啡' },
-      { time: '09:00', title: 'Work Mode On', type: 'work', location: 'Co-working Space', notes: '專注工作日' },
-      { time: '18:00', title: '晚餐 & 社交', type: 'food', location: 'Canggu', notes: '若有力氣可去 Just Dance' },
-    ]
-  },
-  {
-    id: 'day7',
-    date: '2/25',
-    day: '週三',
-    location: '峇里島',
-    theme: 'work',
-    hotel: 'The Cruise Berawa',
-    events: [
-      { time: '上午', title: 'Work', type: 'work', location: 'Canggu', notes: '上半場工作' },
-      { time: '12:00', title: '換飯店', type: 'hotel', location: 'Canggu → Berawa', notes: '移動到貝拉瓦郵輪公寓' },
-      { time: '下午', title: 'Work @ New Hotel', type: 'work', location: 'The Cruise Berawa', notes: '公寓環境好，適合視訊會議' },
-      { time: '備註', title: 'Bambu Fitness?', type: 'gym', location: 'Uluwatu (遠)', notes: '若想去這間網紅健身房，可趁今天包車去' },
-    ]
-  },
-  {
-    id: 'day8',
-    date: '2/26',
-    day: '週四',
-    location: '峇里島',
-    theme: 'work',
-    hotel: 'The Cruise Berawa',
-    events: [
-      { time: '全天', title: '最後衝刺', type: 'work', location: 'Berawa', notes: '工作收尾' },
-      { time: '17:00', title: 'Finns Beach Club', type: 'activity', location: 'Berawa Beach', notes: '看夕陽慶祝 Digital Nomad 結束' },
-    ]
-  },
-  {
-    id: 'day9',
-    date: '2/27',
-    day: '週五',
-    location: '返台',
-    theme: 'transit',
-    hotel: 'Sweet Home',
-    events: [
-      { time: '11:00', title: '早午餐 & 退房', type: 'food', location: 'Berawa', notes: '最後巡禮' },
-      { time: '12:30', title: '前往機場', type: 'move', location: '前往 DPS 機場', notes: '預留塞車時間' },
-      { time: '15:45', title: 'CI 0772 飛往台北', type: 'flight', location: 'DPS → TPE', notes: '抵達桃園 21:05' },
-    ]
-  },
-];
+    <div id="root" class="w-full max-w-md h-screen max-h-[900px] bg-white shadow-2xl overflow-hidden relative"></div>
 
-const bucketList = [
-  { 
-    category: 'Gym', 
-    title: 'Wanderlust Fitness Village', 
-    location: 'Padonan', 
-    desc: '全島最大 CrossFit 聖地，氣氛熱血',
-    bestDay: '週一 (2/23)'
-  },
-  { 
-    category: 'Gym', 
-    title: 'BYND Fitness Club', 
-    location: 'Canggu', 
-    desc: '最美稻田景觀，適合拍照、精緻健身',
-    bestDay: '週一或工作空檔'
-  },
-  { 
-    category: 'Dance', 
-    title: 'Just Dance Bali', 
-    location: 'Berawa', 
-    desc: 'Afro Classes (非洲舞) 超推',
-    bestDay: '週一 & 週二'
-  },
-  { 
-    category: 'Yoga', 
-    title: 'Udara Bali', 
-    location: 'Seseh (海邊)', 
-    desc: '空中瑜珈、桑拿、冰水池',
-    bestDay: '週一 (半日遊)'
-  },
-  { 
-    category: 'Yoga', 
-    title: 'The Practice', 
-    location: 'Canggu', 
-    desc: '傳統哈達瑜珈，竹屋教室',
-    bestDay: '工作日傍晚'
-  },
-];
+    <script type="text/babel">
+        const { useState } = React;
 
-// --- Docs Checklist Data ---
-const checklistData = [
-  {
-    category: '行前準備',
-    items: [
-      { text: '印尼電子簽證 (e-VOA)', note: '出發前上網申請，省去排隊時間', checked: false },
-      { text: '日本 & 印尼網卡', note: '建議準備漫遊或兩張 SIM 卡', checked: false },
-      { text: '轉接頭 (峇里島)', note: '雙孔圓插 (Type C/F)', checked: false },
-      { text: '防蚊液', note: '熱帶地區必備', checked: false },
-    ]
-  },
-  {
-    category: '重要交通提醒',
-    items: [
-      { text: '⚠️ 2/22 機場：成田 (NRT)', note: '千萬別跑去羽田！', checked: false },
-      { text: '⚠️ 2/22 吉隆坡轉機', note: '只有 1 小時，下機請衝刺', checked: false },
-      { text: '2/22 峇里島接機', note: '抵達已晚 (21:05)，務必預約接送', checked: false },
-    ]
-  },
-  {
-    category: '預約確認',
-    items: [
-      { text: '麻布台 粋 稻葉', note: '2/20 (五) 午餐', checked: false },
-      { text: 'teamLab Borderless', note: '2/20 (五) 下午 (需購票)', checked: false },
-      { text: '淺草今半', note: '2/21 (六) 午餐 (建議預約)', checked: false },
-    ]
-  }
-];
+        // --- 內建圖示組件 (SVG) ---
+        // 移除外部依賴，確保穩定性
+        const Icons = {
+            Plane: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 12h20"/><path d="M13 2l9 10-9 10"/><path d="M2 12l5-5m-5 5l5 5"/></svg>
+            ), // Simplified Plane for direction, actually let's use a proper Plane icon
+            Plane: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22h20"/><path d="M13 2L2 14h12l-2 8 11-10h-12z" fill="none" stroke="none"/><path d="M2 22h20"/><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> 
+            ), // Wait, let's stick to standard Lucide paths manually for best look
+            Plane: ({ size = 24, className }) => (
+                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 12h20"/><path d="M13 2l9 10-9 10"/><path d="M2 12l5-5m-5 5l5 5"/></svg>
+            ), // Reverting to arrow-like, let's use real plane path
+            Plane: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22h20"/><path d="M20.5 10.5 10.5 22"/><path d="m20.5 10.5-9-9"/><path d="m20.5 10.5-6.5-6.5L4 14l10 10 6.5-13.5z"/></svg>
+            ), // Paper plane style
+            MapPin: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            ),
+            Coffee: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>
+            ),
+            Utensils: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+            ),
+            Moon: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            ),
+            Sun: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            ),
+            Laptop: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>
+            ),
+            Dumbbell: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+            ),
+            Camera: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            ),
+            Calendar: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            ),
+            Info: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            ),
+            ChevronRight: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>
+            ),
+            ArrowRight: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            ),
+            CheckSquare: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            ),
+            AlertTriangle: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            ),
+            FileText: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+            ),
+            Music: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            )
+        };
 
-// --- Components ---
+        const { 
+            Plane, MapPin, Coffee, Utensils, Moon, Sun, Laptop, Dumbbell, 
+            Music, Camera, Calendar, Info, ChevronRight, ArrowRight, 
+            CheckSquare, AlertTriangle, FileText 
+        } = Icons;
 
-const EventIcon = ({ type }) => {
-  switch (type) {
-    case 'flight': return <Plane className="text-blue-500" size={20} />;
-    case 'food': return <Utensils className="text-orange-500" size={20} />;
-    case 'work': return <Laptop className="text-indigo-500" size={20} />;
-    case 'activity': return <Camera className="text-green-500" size={20} />;
-    case 'run': return <Sun className="text-yellow-500" size={20} />;
-    case 'gym': return <Dumbbell className="text-red-500" size={20} />;
-    case 'hotel': return <Moon className="text-purple-500" size={20} />;
-    case 'move': return <MapPin className="text-gray-500" size={20} />;
-    case 'transit': return <ArrowRight className="text-gray-400" size={20} />;
-    case 'note': return <AlertTriangle className="text-red-500" size={20} />;
-    default: return <Info className="text-gray-400" size={20} />;
-  }
-};
+        // --- Data: 完整的行程資料庫 ---
+        const scheduleData = [
+          {
+            id: 'day1',
+            date: '2/19',
+            day: '週四',
+            location: '東京',
+            theme: 'entry',
+            hotel: '三上淺草橋飯店',
+            events: [
+              { time: '09:00', endTime: '12:50', title: 'CI 0220 飛往東京', type: 'flight', location: '松山 (TSA) → 羽田 (HND)', notes: '抵達後前往飯店 Check-in' },
+              { 
+                time: '15:00', 
+                title: 'Glitch Coffee (日本橋店)', 
+                type: 'food', 
+                location: '日本橋本町 1-1-3 立石本町ビル 1F', 
+                mapUrl: 'https://maps.app.goo.gl/phFex9VWXVAtVJsm7',
+                notes: '必喝淺焙手沖，離晚餐地點很近' 
+              },
+              { 
+                time: '17:30', 
+                title: '五代目 花山烏龍麵', 
+                type: 'food', 
+                location: '日本橋店', 
+                mapUrl: 'https://maps.app.goo.gl/sMkzjHsJ3V2ecYH88',
+                notes: '建議 17:00 前往排隊，必點「鬼紐川寬麵」' 
+              },
+              { 
+                time: '20:00', 
+                title: '飯店休息', 
+                type: 'hotel', 
+                location: '三上淺草橋飯店', 
+                mapUrl: 'https://maps.app.goo.gl/Rs6CwSPm4CVYrcmZA',
+                notes: '淺草橋站附近' 
+              },
+            ]
+          },
+          {
+            id: 'day2',
+            date: '2/20',
+            day: '週五',
+            location: '東京',
+            theme: 'foodie',
+            hotel: '三上淺草橋飯店',
+            events: [
+              { time: '07:30', title: '前往 PATH 排隊', type: 'move', location: '代代木公園/富谷', notes: '排隊名店，務必提早' },
+              { 
+                time: '08:00', 
+                title: 'PATH 早餐', 
+                type: 'food', 
+                location: 'PATH', 
+                mapUrl: 'https://maps.app.goo.gl/yoXuMWKVWCMVh7529',
+                notes: '必點：荷蘭鬆餅 (Dutch Pancake)' 
+              },
+              { time: '10:30', title: '中目黑散策', type: 'activity', location: '中目黑', notes: '目黑川、星巴克臻選烘焙工坊' },
+              { time: '12:00', title: '麻布台 粋 稻葉', type: 'food', location: '麻布台之丘 Tower Plaza 3F', notes: '【已預約】午間壽司懷石' },
+              { time: '14:30', title: '麻布台之丘 & teamLab', type: 'activity', location: '麻布台之丘', notes: 'teamLab Borderless (需預約)、看東京鐵塔' },
+            ]
+          },
+          {
+            id: 'day3',
+            date: '2/21',
+            day: '週六',
+            location: '東京',
+            theme: 'leisure',
+            hotel: '三上淺草橋飯店',
+            events: [
+              { time: '上午', title: '淺草散策', type: 'activity', location: '雷門 / 仲見世通', notes: '飯店附近，輕鬆逛逛' },
+              { 
+                time: '12:00', 
+                title: '淺草今半 (國際通本店)', 
+                type: 'food', 
+                location: '台東區西淺草 3-1-12', 
+                mapUrl: 'https://www.google.com/maps/search/?api=1&query=Asakusa+Imahan+Kokusai+Dori+Honten',
+                notes: '百年壽喜燒老店，午間套餐CP值高 (建議預約)' 
+              },
+              { time: '下午', title: '最後採購 / 自由活動', type: 'activity', location: '銀座 / 澀谷', notes: '把握最後逛街時間' },
+              { time: '晚上', title: '打包行李', type: 'note', location: '飯店', notes: '⚠️ 明天去成田機場 (NRT)，查好交通！' },
+            ]
+          },
+          {
+            id: 'day4',
+            date: '2/22',
+            day: '週日',
+            location: '移動',
+            theme: 'transit',
+            hotel: 'Roomates Hostel Canggu',
+            events: [
+              { time: '07:30', title: '前往成田機場', type: 'move', location: '往 NRT', notes: '搭乘 Skyliner 或 N\'EX' },
+              { time: '10:25', title: 'OD873 飛往吉隆坡', type: 'flight', location: '成田 (NRT) → 吉隆坡 (KUL)', notes: 'Batik Air' },
+              { time: '16:55', title: '吉隆坡轉機', type: 'transit', location: 'KUL', notes: '⚠️ 轉機僅 1 小時，請衝刺！' },
+              { time: '17:55', title: 'OD157 飛往峇里島', type: 'flight', location: 'KUL → DPS', notes: '抵達峇里島 21:05' },
+              { time: '22:00', title: '前往 Canggu', type: 'move', location: 'Canggu', notes: '建議預約機場接送' },
+            ]
+          },
+          {
+            id: 'day5',
+            date: '2/23',
+            day: '週一',
+            location: '峇里島',
+            theme: 'explore',
+            hotel: 'Roomates Hostel Canggu',
+            events: [
+              { time: '上午', title: '適應放鬆', type: 'activity', location: 'Canggu', notes: '早午餐、按摩、探店' },
+              { time: '下午', title: '自由活動 (選項)', type: 'activity', location: 'Canggu Area', notes: '選項：1. Wanderlust/BYND 健身 2. Just Dance (Afro) 3. Udara Yoga' },
+              { time: '晚上', title: 'Canggu 夜生活', type: 'food', location: 'The Lawn / Old Man\'s', notes: '享受海邊氛圍' },
+            ]
+          },
+          {
+            id: 'day6',
+            date: '2/24',
+            day: '週二',
+            location: '峇里島',
+            theme: 'work',
+            hotel: 'Roomates Hostel Canggu',
+            events: [
+              { time: '06:15', title: 'Rise Run Bali 晨跑', type: 'run', location: 'The Goat Father', notes: '4km/8km 輕鬆跑，跑完喝咖啡' },
+              { time: '09:00', title: 'Work Mode On', type: 'work', location: 'Co-working Space', notes: '專注工作日' },
+              { time: '18:00', title: '晚餐 & 社交', type: 'food', location: 'Canggu', notes: '若有力氣可去 Just Dance' },
+            ]
+          },
+          {
+            id: 'day7',
+            date: '2/25',
+            day: '週三',
+            location: '峇里島',
+            theme: 'work',
+            hotel: 'The Cruise Berawa',
+            events: [
+              { time: '上午', title: 'Work', type: 'work', location: 'Canggu', notes: '上半場工作' },
+              { time: '12:00', title: '換飯店', type: 'hotel', location: 'Canggu → Berawa', notes: '移動到貝拉瓦郵輪公寓' },
+              { time: '下午', title: 'Work @ New Hotel', type: 'work', location: 'The Cruise Berawa', notes: '公寓環境好，適合視訊會議' },
+              { time: '備註', title: 'Bambu Fitness?', type: 'gym', location: 'Uluwatu (遠)', notes: '若想去這間網紅健身房，可趁今天包車去' },
+            ]
+          },
+          {
+            id: 'day8',
+            date: '2/26',
+            day: '週四',
+            location: '峇里島',
+            theme: 'work',
+            hotel: 'The Cruise Berawa',
+            events: [
+              { time: '全天', title: '最後衝刺', type: 'work', location: 'Berawa', notes: '工作收尾' },
+              { time: '17:00', title: 'Finns Beach Club', type: 'activity', location: 'Berawa Beach', notes: '看夕陽慶祝 Digital Nomad 結束' },
+            ]
+          },
+          {
+            id: 'day9',
+            date: '2/27',
+            day: '週五',
+            location: '返台',
+            theme: 'transit',
+            hotel: 'Sweet Home',
+            events: [
+              { time: '11:00', title: '早午餐 & 退房', type: 'food', location: 'Berawa', notes: '最後巡禮' },
+              { time: '12:30', title: '前往機場', type: 'move', location: '前往 DPS 機場', notes: '預留塞車時間' },
+              { time: '15:45', title: 'CI 0772 飛往台北', type: 'flight', location: 'DPS → TPE', notes: '抵達桃園 21:05' },
+            ]
+          },
+        ];
 
-const openMap = (location, customMapUrl) => {
-  if (customMapUrl) {
-    window.open(customMapUrl, '_blank');
-    return;
-  }
-  const query = encodeURIComponent(location);
-  window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-};
+        const bucketList = [
+          { 
+            category: 'Gym', 
+            title: 'Wanderlust Fitness Village', 
+            location: 'Padonan', 
+            desc: '全島最大 CrossFit 聖地，氣氛熱血',
+            bestDay: '週一 (2/23)'
+          },
+          { 
+            category: 'Gym', 
+            title: 'BYND Fitness Club', 
+            location: 'Canggu', 
+            desc: '最美稻田景觀，適合拍照、精緻健身',
+            bestDay: '週一或工作空檔'
+          },
+          { 
+            category: 'Dance', 
+            title: 'Just Dance Bali', 
+            location: 'Berawa', 
+            desc: 'Afro Classes (非洲舞) 超推',
+            bestDay: '週一 & 週二'
+          },
+          { 
+            category: 'Yoga', 
+            title: 'Udara Bali', 
+            location: 'Seseh (海邊)', 
+            desc: '空中瑜珈、桑拿、冰水池',
+            bestDay: '週一 (半日遊)'
+          },
+          { 
+            category: 'Yoga', 
+            title: 'The Practice', 
+            location: 'Canggu', 
+            desc: '傳統哈達瑜珈，竹屋教室',
+            bestDay: '工作日傍晚'
+          },
+        ];
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('itinerary'); // itinerary | bucket | map | docs
-  const [selectedDayId, setSelectedDayId] = useState('day1');
+        // --- Docs Checklist Data ---
+        const checklistData = [
+          {
+            category: '行前準備',
+            items: [
+              { text: '印尼電子簽證 (e-VOA)', note: '出發前上網申請，省去排隊時間', checked: false },
+              { text: '日本 & 印尼網卡', note: '建議準備漫遊或兩張 SIM 卡', checked: false },
+              { text: '轉接頭 (峇里島)', note: '雙孔圓插 (Type C/F)', checked: false },
+              { text: '防蚊液', note: '熱帶地區必備', checked: false },
+            ]
+          },
+          {
+            category: '重要交通提醒',
+            items: [
+              { text: '⚠️ 2/22 機場：成田 (NRT)', note: '千萬別跑去羽田！', checked: false },
+              { text: '⚠️ 2/22 吉隆坡轉機', note: '只有 1 小時，下機請衝刺', checked: false },
+              { text: '2/22 峇里島接機', note: '抵達已晚 (21:05)，務必預約接送', checked: false },
+            ]
+          },
+          {
+            category: '預約確認',
+            items: [
+              { text: '麻布台 粋 稻葉', note: '2/20 (五) 午餐', checked: false },
+              { text: 'teamLab Borderless', note: '2/20 (五) 下午 (需購票)', checked: false },
+              { text: '淺草今半', note: '2/21 (六) 午餐 (建議預約)', checked: false },
+            ]
+          }
+        ];
 
-  const currentDay = scheduleData.find(d => d.id === selectedDayId);
+        // --- Components ---
 
-  // 整理所有地圖點位
-  const allLocations = [
-    ...scheduleData.flatMap(d => d.events.filter(e => e.type !== 'note').map(e => ({
-      title: e.title,
-      location: e.location,
-      mapUrl: e.mapUrl,
-      day: d.date,
-      type: e.type
-    }))),
-    ...bucketList.map(b => ({
-      title: b.title,
-      location: b.location,
-      mapUrl: null,
-      day: 'Bucket',
-      type: b.category === 'Gym' ? 'gym' : 'activity'
-    }))
-  ];
+        const EventIcon = ({ type }) => {
+          switch (type) {
+            case 'flight': return <Plane className="text-blue-500" size={20} />;
+            case 'food': return <Utensils className="text-orange-500" size={20} />;
+            case 'work': return <Laptop className="text-indigo-500" size={20} />;
+            case 'activity': return <Camera className="text-green-500" size={20} />;
+            case 'run': return <Sun className="text-yellow-500" size={20} />;
+            case 'gym': return <Dumbbell className="text-red-500" size={20} />;
+            case 'hotel': return <Moon className="text-purple-500" size={20} />;
+            case 'move': return <MapPin className="text-gray-500" size={20} />;
+            case 'transit': return <ArrowRight className="text-gray-400" size={20} />;
+            case 'note': return <AlertTriangle className="text-red-500" size={20} />;
+            default: return <Info className="text-gray-400" size={20} />;
+          }
+        };
 
-  return (
-    <div className="flex flex-col h-screen bg-gray-50 font-sans max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
-      
-      {/* Header */}
-      <header className="bg-white px-6 pt-12 pb-4 shadow-sm z-10">
-        <div className="flex justify-between items-center mb-2">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">2026 Nomad Trip</h1>
-            <p className="text-sm text-gray-500">東京 🇯🇵 ➔ 峇里島 🇮🇩</p>
-          </div>
-          <div className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
-            9 Days
-          </div>
-        </div>
-        
-        {/* Main Tabs (Top) - Only show itinerary & bucket here to save space or keep logic simple */}
-        <div className="flex space-x-4 mt-4 border-b border-gray-100">
-          <button 
-            onClick={() => setActiveTab('itinerary')}
-            className={`pb-2 text-sm font-medium ${activeTab === 'itinerary' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}
-          >
-            每日行程
-          </button>
-          <button 
-            onClick={() => setActiveTab('bucket')}
-            className={`pb-2 text-sm font-medium ${activeTab === 'bucket' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}
-          >
-            口袋名單
-          </button>
-        </div>
-      </header>
+        const openMap = (location, customMapUrl) => {
+          if (customMapUrl) {
+            window.open(customMapUrl, '_blank');
+            return;
+          }
+          const query = encodeURIComponent(location);
+          window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+        };
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        
-        {activeTab === 'itinerary' && (
-          <>
-            {/* Date Selector */}
-            <div className="bg-white pb-2 overflow-x-auto scrollbar-hide">
-              <div className="flex px-4 space-x-3 w-max">
-                {scheduleData.map((day) => (
-                  <button
-                    key={day.id}
-                    onClick={() => setSelectedDayId(day.id)}
-                    className={`flex flex-col items-center justify-center min-w-[60px] h-[70px] rounded-xl transition-all ${
-                      selectedDayId === day.id 
-                        ? 'bg-blue-600 text-white shadow-lg scale-105' 
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="text-xs font-medium">{day.day}</span>
-                    <span className="text-lg font-bold">{day.date}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+        function App() {
+          const [activeTab, setActiveTab] = useState('itinerary'); // itinerary | bucket | map | docs
+          const [selectedDayId, setSelectedDayId] = useState('day1');
 
-            {/* Timeline */}
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-50">
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">{currentDay.location}</h2>
-                  <p className="text-sm text-gray-500 flex items-center">
-                    <Moon size={12} className="mr-1" /> 住: {currentDay.hotel}
-                  </p>
-                </div>
-              </div>
+          const currentDay = scheduleData.find(d => d.id === selectedDayId);
 
-              {currentDay.events.map((event, index) => (
-                <div key={index} className="flex relative">
-                  {index !== currentDay.events.length - 1 && (
-                    <div className="absolute left-[19px] top-8 bottom-[-16px] w-[2px] bg-gray-200"></div>
-                  )}
-                  <div className="flex flex-col items-center mr-4 min-w-[40px]">
-                    <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100 z-10">
-                      <EventIcon type={event.type} />
-                    </div>
-                    <span className="text-xs font-semibold text-gray-400 mt-1">{event.time}</span>
-                  </div>
-                  <div className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow mb-2">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-gray-800">{event.title}</h3>
-                      <button 
-                        onClick={() => openMap(event.location, event.mapUrl)}
-                        className="text-gray-400 hover:text-blue-500 transition-colors"
-                      >
-                        <MapPin size={16} />
-                      </button>
-                    </div>
-                    <p className="text-sm text-blue-600 font-medium mt-1">{event.location}</p>
-                    {event.notes && (
-                      <div className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                        {event.notes}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <div className="h-20"></div>
-            </div>
-          </>
-        )}
+          // 整理所有地圖點位
+          const allLocations = [
+            ...scheduleData.flatMap(d => d.events.filter(e => e.type !== 'note').map(e => ({
+              title: e.title,
+              location: e.location,
+              mapUrl: e.mapUrl,
+              day: d.date,
+              type: e.type
+            }))),
+            ...bucketList.map(b => ({
+              title: b.title,
+              location: b.location,
+              mapUrl: null,
+              day: 'Bucket',
+              type: b.category === 'Gym' ? 'gym' : 'activity'
+            }))
+          ];
 
-        {activeTab === 'bucket' && (
-          <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-4">
-             <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
-               <h3 className="text-blue-800 font-bold mb-1 flex items-center"><Info size={16} className="mr-2"/> 未定日期的口袋名單</h3>
-               <p className="text-xs text-blue-600">這些地點可以隨時安插在空檔！</p>
-             </div>
-             {bucketList.map((item, idx) => (
-               <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                 <div className="flex justify-between items-start mb-2">
-                   <span className="text-xs font-bold text-white bg-gray-800 px-2 py-1 rounded-md">{item.category}</span>
-                   <button onClick={() => openMap(item.title)} className="text-gray-400 hover:text-blue-500"><MapPin size={16}/></button>
-                 </div>
-                 <h3 className="font-bold text-lg text-gray-900">{item.title}</h3>
-                 <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
-                 <div className="mt-3 flex items-center text-xs text-orange-500 font-medium">
-                   <Calendar size={12} className="mr-1" />
-                   建議：{item.bestDay}
-                 </div>
-               </div>
-             ))}
-             <div className="h-20"></div>
-          </div>
-        )}
-
-        {activeTab === 'docs' && (
-          <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">行前注意清單 (Checklist)</h2>
-            {checklistData.map((section, idx) => (
-              <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-100 font-bold text-gray-700">
-                  {section.category}
-                </div>
-                <div className="p-4 space-y-3">
-                  {section.items.map((item, i) => (
-                    <div key={i} className="flex items-start">
-                       <CheckSquare size={20} className="text-gray-300 mr-3 mt-0.5" />
-                       <div>
-                         <p className="text-gray-800 font-medium">{item.text}</p>
-                         {item.note && <p className="text-xs text-red-500 mt-0.5">{item.note}</p>}
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <div className="h-20"></div>
-          </div>
-        )}
-
-        {activeTab === 'map' && (
-          <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">所有地點列表</h2>
-            <p className="text-sm text-gray-500 mb-4">點擊開啟 Google Maps</p>
-            {allLocations.map((loc, idx) => (
-              <div key={idx} onClick={() => openMap(loc.location, loc.mapUrl)} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50">
-                <div className="flex items-center overflow-hidden">
-                  <div className="bg-blue-50 p-2 rounded-full mr-3">
-                    <EventIcon type={loc.type} />
-                  </div>
+          return (
+            <div className="flex flex-col h-full bg-gray-50 font-sans mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
+              
+              {/* Header */}
+              <header className="bg-white px-6 pt-8 pb-4 shadow-sm z-10">
+                <div className="flex justify-between items-center mb-2">
                   <div>
-                    <h4 className="font-bold text-gray-800 truncate">{loc.title}</h4>
-                    <p className="text-xs text-gray-500 truncate">{loc.location}</p>
+                    <h1 className="text-2xl font-bold text-gray-900">2026 Nomad Trip</h1>
+                    <p className="text-sm text-gray-500">東京 🇯🇵 ➔ 峇里島 🇮🇩</p>
+                  </div>
+                  <div className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+                    9 Days
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-gray-300 ml-2 flex-shrink-0" />
-              </div>
-            ))}
-            <div className="h-20"></div>
-          </div>
-        )}
+                
+                {/* Main Tabs (Top) */}
+                <div className="flex space-x-4 mt-4 border-b border-gray-100">
+                  <button 
+                    onClick={() => setActiveTab('itinerary')}
+                    className={`pb-2 text-sm font-medium ${activeTab === 'itinerary' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}
+                  >
+                    每日行程
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('bucket')}
+                    className={`pb-2 text-sm font-medium ${activeTab === 'bucket' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'}`}
+                  >
+                    口袋名單
+                  </button>
+                </div>
+              </header>
 
-      </div>
-      
-      {/* Bottom Nav - Fully Functional Now */}
-      <div className="bg-white border-t border-gray-200 py-3 px-6 flex justify-between items-center text-xs text-gray-500">
-         <button 
-           onClick={() => setActiveTab('itinerary')}
-           className={`flex flex-col items-center ${activeTab === 'itinerary' || activeTab === 'bucket' ? 'text-blue-600' : 'hover:text-blue-500'}`}
-         >
-           <Calendar size={20} />
-           <span className="mt-1">Trip</span>
-         </button>
-         <button 
-           onClick={() => setActiveTab('map')}
-           className={`flex flex-col items-center ${activeTab === 'map' ? 'text-blue-600' : 'hover:text-blue-500'}`}
-         >
-           <MapPin size={20} />
-           <span className="mt-1">Map</span>
-         </button>
-         <button 
-           onClick={() => setActiveTab('docs')}
-           className={`flex flex-col items-center ${activeTab === 'docs' ? 'text-blue-600' : 'hover:text-blue-500'}`}
-         >
-           <FileText size={20} />
-           <span className="mt-1">Docs</span>
-         </button>
-      </div>
-    </div>
-  );
-}
+              {/* Content Area */}
+              <div className="flex-1 overflow-hidden flex flex-col">
+                
+                {activeTab === 'itinerary' && (
+                  <>
+                    {/* Date Selector */}
+                    <div className="bg-white pb-2 overflow-x-auto scrollbar-hide">
+                      <div className="flex px-4 space-x-3 w-max">
+                        {scheduleData.map((day) => (
+                          <button
+                            key={day.id}
+                            onClick={() => setSelectedDayId(day.id)}
+                            className={`flex flex-col items-center justify-center min-w-[60px] h-[70px] rounded-xl transition-all ${
+                              selectedDayId === day.id 
+                                ? 'bg-blue-600 text-white shadow-lg scale-105' 
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            <span className="text-xs font-medium">{day.day}</span>
+                            <span className="text-lg font-bold">{day.date}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-50 scrollbar-hide">
+                      <div className="flex items-center space-x-2 mb-6">
+                        <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
+                        <div>
+                          <h2 className="text-lg font-bold text-gray-800">{currentDay.location}</h2>
+                          <p className="text-sm text-gray-500 flex items-center">
+                            <Moon size={12} className="mr-1" /> 住: {currentDay.hotel}
+                          </p>
+                        </div>
+                      </div>
+
+                      {currentDay.events.map((event, index) => (
+                        <div key={index} className="flex relative">
+                          {index !== currentDay.events.length - 1 && (
+                            <div className="absolute left-[19px] top-8 bottom-[-16px] w-[2px] bg-gray-200"></div>
+                          )}
+                          <div className="flex flex-col items-center mr-4 min-w-[40px]">
+                            <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100 z-10">
+                              <EventIcon type={event.type} />
+                            </div>
+                            <span className="text-xs font-semibold text-gray-400 mt-1">{event.time}</span>
+                          </div>
+                          <div className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow mb-2">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-gray-800">{event.title}</h3>
+                              <button 
+                                onClick={() => openMap(event.location, event.mapUrl)}
+                                className="text-gray-400 hover:text-blue-500 transition-colors"
+                              >
+                                <MapPin size={16} />
+                              </button>
+                            </div>
+                            <p className="text-sm text-blue-600 font-medium mt-1">{event.location}</p>
+                            {event.notes && (
+                              <div className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                {event.notes}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="h-20"></div>
+                    </div>
+                  </>
+                )}
+
+                {activeTab === 'bucket' && (
+                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-4 scrollbar-hide">
+                     <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
+                       <h3 className="text-blue-800 font-bold mb-1 flex items-center"><Info size={16} className="mr-2"/> 未定日期的口袋名單</h3>
+                       <p className="text-xs text-blue-600">這些地點可以隨時安插在空檔！</p>
+                     </div>
+                     {bucketList.map((item, idx) => (
+                       <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                         <div className="flex justify-between items-start mb-2">
+                           <span className="text-xs font-bold text-white bg-gray-800 px-2 py-1 rounded-md">{item.category}</span>
+                           <button onClick={() => openMap(item.title)} className="text-gray-400 hover:text-blue-500"><MapPin size={16}/></button>
+                         </div>
+                         <h3 className="font-bold text-lg text-gray-900">{item.title}</h3>
+                         <p className="text-sm text-gray-600 mt-1">{item.desc}</p>
+                         <div className="mt-3 flex items-center text-xs text-orange-500 font-medium">
+                           <Calendar size={12} className="mr-1" />
+                           建議：{item.bestDay}
+                         </div>
+                       </div>
+                     ))}
+                     <div className="h-20"></div>
+                  </div>
+                )}
+
+                {activeTab === 'docs' && (
+                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-6 scrollbar-hide">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">行前注意清單 (Checklist)</h2>
+                    {checklistData.map((section, idx) => (
+                      <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-100 font-bold text-gray-700">
+                          {section.category}
+                        </div>
+                        <div className="p-4 space-y-3">
+                          {section.items.map((item, i) => (
+                            <div key={i} className="flex items-start">
+                               <CheckSquare size={20} className="text-gray-300 mr-3 mt-0.5" />
+                               <div>
+                                 <p className="text-gray-800 font-medium">{item.text}</p>
+                                 {item.note && <p className="text-xs text-red-500 mt-0.5">{item.note}</p>}
+                               </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="h-20"></div>
+                  </div>
+                )}
+
+                {activeTab === 'map' && (
+                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-4 scrollbar-hide">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">所有地點列表</h2>
+                    <p className="text-sm text-gray-500 mb-4">點擊開啟 Google Maps</p>
+                    {allLocations.map((loc, idx) => (
+                      <div key={idx} onClick={() => openMap(loc.location, loc.mapUrl)} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50">
+                        <div className="flex items-center overflow-hidden">
+                          <div className="bg-blue-50 p-2 rounded-full mr-3">
+                            <EventIcon type={loc.type} />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-800 truncate">{loc.title}</h4>
+                            <p className="text-xs text-gray-500 truncate">{loc.location}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-300 ml-2 flex-shrink-0" />
+                      </div>
+                    ))}
+                    <div className="h-20"></div>
+                  </div>
+                )}
+
+              </div>
+              
+              {/* Bottom Nav */}
+              <div className="bg-white border-t border-gray-200 py-3 px-6 flex justify-between items-center text-xs text-gray-500">
+                 <button 
+                   onClick={() => setActiveTab('itinerary')}
+                   className={`flex flex-col items-center ${activeTab === 'itinerary' || activeTab === 'bucket' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                 >
+                   <Calendar size={20} />
+                   <span className="mt-1">Trip</span>
+                 </button>
+                 <button 
+                   onClick={() => setActiveTab('map')}
+                   className={`flex flex-col items-center ${activeTab === 'map' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                 >
+                   <MapPin size={20} />
+                   <span className="mt-1">Map</span>
+                 </button>
+                 <button 
+                   onClick={() => setActiveTab('docs')}
+                   className={`flex flex-col items-center ${activeTab === 'docs' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                 >
+                   <FileText size={20} />
+                   <span className="mt-1">Docs</span>
+                 </button>
+              </div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
