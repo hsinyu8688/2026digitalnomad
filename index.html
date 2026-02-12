@@ -31,20 +31,10 @@
         const { useState } = React;
 
         // --- 內建圖示組件 (SVG) ---
-        // 移除外部依賴，確保穩定性
         const Icons = {
             Plane: ({ size = 24, className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 12h20"/><path d="M13 2l9 10-9 10"/><path d="M2 12l5-5m-5 5l5 5"/></svg>
-            ), // Simplified Plane for direction, actually let's use a proper Plane icon
-            Plane: ({ size = 24, className }) => (
-                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22h20"/><path d="M13 2L2 14h12l-2 8 11-10h-12z" fill="none" stroke="none"/><path d="M2 22h20"/><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> 
-            ), // Wait, let's stick to standard Lucide paths manually for best look
-            Plane: ({ size = 24, className }) => (
-                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 12h20"/><path d="M13 2l9 10-9 10"/><path d="M2 12l5-5m-5 5l5 5"/></svg>
-            ), // Reverting to arrow-like, let's use real plane path
-            Plane: ({ size = 24, className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 22h20"/><path d="M20.5 10.5 10.5 22"/><path d="m20.5 10.5-9-9"/><path d="m20.5 10.5-6.5-6.5L4 14l10 10 6.5-13.5z"/></svg>
-            ), // Paper plane style
+            ),
             MapPin: ({ size = 24, className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             ),
@@ -84,6 +74,9 @@
             CheckSquare: ({ size = 24, className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             ),
+            Square: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>
+            ),
             AlertTriangle: ({ size = 24, className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             ),
@@ -92,13 +85,19 @@
             ),
             Music: ({ size = 24, className }) => (
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            ),
+            MessageCircle: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+            ),
+            Briefcase: ({ size = 24, className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             )
         };
 
         const { 
             Plane, MapPin, Coffee, Utensils, Moon, Sun, Laptop, Dumbbell, 
             Music, Camera, Calendar, Info, ChevronRight, ArrowRight, 
-            CheckSquare, AlertTriangle, FileText 
+            CheckSquare, Square, AlertTriangle, FileText, MessageCircle, Briefcase
         } = Icons;
 
         // --- Data: 完整的行程資料庫 ---
@@ -170,12 +169,12 @@
             events: [
               { time: '上午', title: '淺草散策', type: 'activity', location: '雷門 / 仲見世通', notes: '飯店附近，輕鬆逛逛' },
               { 
-                time: '12:00', 
+                time: '11:00', 
                 title: '淺草今半 (國際通本店)', 
                 type: 'food', 
                 location: '台東區西淺草 3-1-12', 
                 mapUrl: 'https://www.google.com/maps/search/?api=1&query=Asakusa+Imahan+Kokusai+Dori+Honten',
-                notes: '百年壽喜燒老店，午間套餐CP值高 (建議預約)' 
+                notes: '百年壽喜燒老店，午間套餐CP值高 (需 11:00 排隊)' 
               },
               { time: '下午', title: '最後採購 / 自由活動', type: 'activity', location: '銀座 / 澀谷', notes: '把握最後逛街時間' },
               { time: '晚上', title: '打包行李', type: 'note', location: '飯店', notes: '⚠️ 明天去成田機場 (NRT)，查好交通！' },
@@ -204,8 +203,16 @@
             theme: 'explore',
             hotel: 'Roomates Hostel Canggu',
             events: [
-              { time: '上午', title: '適應放鬆', type: 'activity', location: 'Canggu', notes: '早午餐、按摩、探店' },
-              { time: '下午', title: '自由活動 (選項)', type: 'activity', location: 'Canggu Area', notes: '選項：1. Wanderlust/BYND 健身 2. Just Dance (Afro) 3. Udara Yoga' },
+              { 
+                time: '08:00', 
+                title: '辦理電話卡', 
+                type: 'activity', 
+                location: 'Jl. Raya Uluwatu No.82 (Kuta)', 
+                mapUrl: 'https://www.google.com/maps/search/?api=1&query=Jl.+Raya+Uluwatu+No.82,+Tuban,+Kec.+Kuta,+Kabupaten+Badung,+Bali+80361',
+                notes: '抵達後先辦理印尼當地網卡' 
+              },
+              { time: '10:30', title: 'Bambu Fitness 運動 & 午餐', type: 'gym', location: 'Bambu Fitness', notes: '運動完直接在健身房享用午餐' },
+              { time: '下午', title: '返回 Canggu / 自由活動', type: 'activity', location: 'Canggu Area', notes: '選項：Wanderlust / Udara Yoga' },
               { time: '晚上', title: 'Canggu 夜生活', type: 'food', location: 'The Lawn / Old Man\'s', notes: '享受海邊氛圍' },
             ]
           },
@@ -219,7 +226,9 @@
             events: [
               { time: '06:15', title: 'Rise Run Bali 晨跑', type: 'run', location: 'The Goat Father', notes: '4km/8km 輕鬆跑，跑完喝咖啡' },
               { time: '09:00', title: 'Work Mode On', type: 'work', location: 'Co-working Space', notes: '專注工作日' },
-              { time: '18:00', title: '晚餐 & 社交', type: 'food', location: 'Canggu', notes: '若有力氣可去 Just Dance' },
+              { time: '11:45', title: 'Afro Class', type: 'activity', location: 'Just Dance Bali', notes: '11:45 - 12:45，單堂 drop in IDR 175,000' },
+              { time: '14:00', title: '繼續工作', type: 'work', location: 'Canggu', notes: '下午工作時段' },
+              { time: '18:00', title: '晚餐 & 社交', type: 'food', location: 'Canggu', notes: '享受當地美食' },
             ]
           },
           {
@@ -233,7 +242,6 @@
               { time: '上午', title: 'Work', type: 'work', location: 'Canggu', notes: '上半場工作' },
               { time: '12:00', title: '換飯店', type: 'hotel', location: 'Canggu → Berawa', notes: '移動到貝拉瓦郵輪公寓' },
               { time: '下午', title: 'Work @ New Hotel', type: 'work', location: 'The Cruise Berawa', notes: '公寓環境好，適合視訊會議' },
-              { time: '備註', title: 'Bambu Fitness?', type: 'gym', location: 'Uluwatu (遠)', notes: '若想去這間網紅健身房，可趁今天包車去' },
             ]
           },
           {
@@ -299,6 +307,41 @@
             desc: '傳統哈達瑜珈，竹屋教室',
             bestDay: '工作日傍晚'
           },
+          { 
+            category: 'Pilates', 
+            title: 'Luna & Sol. Pilates & Yoga', 
+            location: 'Canggu / Berawa', 
+            desc: '這間皮拉提斯環境超美，必須去！',
+            bestDay: '優先安排 (建議提早預約)'
+          },
+          { 
+            category: 'Food', 
+            title: 'Penny Lane', 
+            location: 'Canggu', 
+            desc: '羅馬競技場廢墟風裝潢，網美必訪超好拍',
+            bestDay: '午餐或下午茶'
+          },
+          { 
+            category: 'Food', 
+            title: 'Muda By/Suka', 
+            location: 'Canggu', 
+            desc: '超人氣亞洲融合料理 / 質感亞洲餐酒館',
+            bestDay: '隨時'
+          },
+          { 
+            category: 'Food', 
+            title: 'Santanera', 
+            location: 'Canggu', 
+            desc: '高質感南美、地中海餐酒館，裝潢非常高級',
+            bestDay: '晚餐時段 (建議預約)'
+          },
+          {
+            category: 'Beauty',
+            title: 'Kamaniya Beauty',
+            location: 'Canggu / 峇里島',
+            desc: '這間洗頭非常便宜，CP值超高！想放鬆必去',
+            bestDay: '隨時 (行程空檔)'
+          }
         ];
 
         // --- Docs Checklist Data ---
@@ -325,8 +368,68 @@
             items: [
               { text: '麻布台 粋 稻葉', note: '2/20 (五) 午餐', checked: false },
               { text: 'teamLab Borderless', note: '2/20 (五) 下午 (需購票)', checked: false },
-              { text: '淺草今半', note: '2/21 (六) 午餐 (建議預約)', checked: false },
+              { text: '淺草今半', note: '2/21 (六) 午餐 (需 11:00 排隊)', checked: false },
             ]
+          }
+        ];
+
+        // --- Indonesian Lingo Data (空耳) ---
+        const lingoData = [
+          {
+            category: '👋 問候 & 基本',
+            phrases: [
+              { original: 'Terima Kasih', chinese: '特麗馬 卡謝', meaning: '謝謝' },
+              { original: 'Sama Sama', chinese: '薩瑪 薩瑪', meaning: '不客氣' },
+              { original: 'Selamat Pagi', chinese: '色拉馬 帕給', meaning: '早安' },
+              { original: 'Apa Kabar', chinese: '阿帕 卡巴', meaning: '你好嗎？' },
+            ]
+          },
+          {
+            category: '🍽️ 餐廳 & 點餐',
+            phrases: [
+              { original: 'Enak', chinese: '恩那', meaning: '好吃' },
+              { original: 'Minta Bon', chinese: '民塔 崩', meaning: '我要買單' },
+              { original: 'Tidak Pedas', chinese: '替打 普達斯', meaning: '不要辣' },
+              { original: 'Air Putih', chinese: '阿以爾 普提', meaning: '白開水' },
+            ]
+          },
+          {
+            category: '💰 購物 & 殺價',
+            phrases: [
+              { original: 'Berapa?', chinese: '波拉怕?', meaning: '多少錢？' },
+              { original: 'Mahal', chinese: '馬哈爾', meaning: '太貴了' },
+              { original: 'Kurang?', chinese: '庫讓?', meaning: '可以便宜點嗎？' },
+              { original: 'Ini', chinese: '以你', meaning: '這個' },
+            ]
+          },
+          {
+            category: '🚗 交通 & 其他',
+            phrases: [
+              { original: 'Toilet', chinese: '托伊萊特', meaning: '廁所' },
+              { original: 'Jalan Jalan', chinese: '加蘭 加蘭', meaning: '隨便逛逛' },
+              { original: 'Kiri / Kanan', chinese: '基里 / 卡南', meaning: '左 / 右' },
+              { original: 'Hati Hati', chinese: '哈蒂 哈蒂', meaning: '小心' },
+            ]
+          }
+        ];
+
+        // --- Packing List Data ---
+        const packingData = [
+          {
+            category: '💼 隨身 & 重要證件',
+            items: ['護照 (含影本)', '錢包 (現金/信用卡)', '手機 & 行動電源', '筆電 & 充電線', '耳機', '原子筆 (寫入境卡)']
+          },
+          {
+            category: '👕 衣物 & 穿搭',
+            items: ['短袖 / 背心', '薄外套 (飛機/冷氣房用)', '內衣褲 & 襪子', '皮拉提斯襪 (運動必備)', '泳裝 & 海灘褲', '墨鏡 & 帽子', '好走的鞋 / 涼拖鞋']
+          },
+          {
+            category: '🧴 盥洗 & 保養',
+            items: ['牙刷 & 牙膏', '洗髮/沐浴乳 (旅行組)', '防曬乳 (海洋友善)', '保養品 / 化妝品', '卸妝 / 洗面乳']
+          },
+          {
+            category: '💊 藥物 & 其他',
+            items: ['腸胃藥 & 止痛藥', '暈車 / 暈機藥', '防蚊液 & 蚊蟲藥', '萬國轉接頭 (雙孔圓插)', '塑膠袋 (裝髒衣物或濕泳衣)']
           }
         ];
 
@@ -358,34 +461,22 @@
         };
 
         function App() {
-          const [activeTab, setActiveTab] = useState('itinerary'); // itinerary | bucket | map | docs
+          const [activeTab, setActiveTab] = useState('itinerary'); // itinerary | bucket | lingo | docs | packing
           const [selectedDayId, setSelectedDayId] = useState('day1');
+          const [packingState, setPackingState] = useState({});
 
           const currentDay = scheduleData.find(d => d.id === selectedDayId);
 
-          // 整理所有地圖點位
-          const allLocations = [
-            ...scheduleData.flatMap(d => d.events.filter(e => e.type !== 'note').map(e => ({
-              title: e.title,
-              location: e.location,
-              mapUrl: e.mapUrl,
-              day: d.date,
-              type: e.type
-            }))),
-            ...bucketList.map(b => ({
-              title: b.title,
-              location: b.location,
-              mapUrl: null,
-              day: 'Bucket',
-              type: b.category === 'Gym' ? 'gym' : 'activity'
-            }))
-          ];
+          const togglePackingItem = (catIdx, itemIdx) => {
+            const key = `${catIdx}-${itemIdx}`;
+            setPackingState(prev => ({...prev, [key]: !prev[key]}));
+          };
 
           return (
             <div className="flex flex-col h-full bg-gray-50 font-sans mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
               
               {/* Header */}
-              <header className="bg-white px-6 pt-8 pb-4 shadow-sm z-10">
+              <header className="bg-white px-6 pt-8 pb-4 shadow-sm z-10 flex-shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">2026 Nomad Trip</h1>
@@ -419,7 +510,7 @@
                 {activeTab === 'itinerary' && (
                   <>
                     {/* Date Selector */}
-                    <div className="bg-white pb-2 overflow-x-auto scrollbar-hide">
+                    <div className="bg-white pb-2 overflow-x-auto scrollbar-hide flex-shrink-0">
                       <div className="flex px-4 space-x-3 w-max">
                         {scheduleData.map((day) => (
                           <button
@@ -509,6 +600,37 @@
                   </div>
                 )}
 
+                {activeTab === 'lingo' && (
+                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-6 scrollbar-hide">
+                    <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 mb-2">
+                       <h3 className="text-orange-800 font-bold mb-1 flex items-center"><MessageCircle size={16} className="mr-2"/> 印尼生存語錄 (空耳版)</h3>
+                       <p className="text-xs text-orange-600">用中文諧音記，開口說說看！</p>
+                    </div>
+
+                    {lingoData.map((section, idx) => (
+                      <div key={idx} className="space-y-3">
+                        <h4 className="font-bold text-gray-700 ml-1">{section.category}</h4>
+                        <div className="grid grid-cols-1 gap-3">
+                          {section.phrases.map((item, i) => (
+                            <div key={i} className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+                               <div>
+                                 <p className="text-lg font-bold text-gray-800">{item.original}</p>
+                                 <p className="text-sm text-gray-500">{item.meaning}</p>
+                               </div>
+                               <div className="text-right">
+                                 <span className="inline-block bg-yellow-100 text-yellow-800 text-sm font-bold px-2 py-1 rounded-lg">
+                                   {item.chinese}
+                                 </span>
+                               </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="h-20"></div>
+                  </div>
+                )}
+
                 {activeTab === 'docs' && (
                   <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-6 scrollbar-hide">
                     <h2 className="text-xl font-bold text-gray-900 mb-2">行前注意清單 (Checklist)</h2>
@@ -534,22 +656,39 @@
                   </div>
                 )}
 
-                {activeTab === 'map' && (
-                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-4 scrollbar-hide">
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">所有地點列表</h2>
-                    <p className="text-sm text-gray-500 mb-4">點擊開啟 Google Maps</p>
-                    {allLocations.map((loc, idx) => (
-                      <div key={idx} onClick={() => openMap(loc.location, loc.mapUrl)} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50">
-                        <div className="flex items-center overflow-hidden">
-                          <div className="bg-blue-50 p-2 rounded-full mr-3">
-                            <EventIcon type={loc.type} />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-gray-800 truncate">{loc.title}</h4>
-                            <p className="text-xs text-gray-500 truncate">{loc.location}</p>
-                          </div>
+                {activeTab === 'packing' && (
+                  <div className="flex-1 overflow-y-auto px-4 py-6 bg-gray-50 space-y-6 scrollbar-hide">
+                    <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-xl font-bold text-gray-900">行李確認清單</h2>
+                        <span className="text-xs text-gray-400 font-medium">點擊打勾確認</span>
+                    </div>
+                    
+                    {packingData.map((section, catIdx) => (
+                      <div key={catIdx} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-100 font-bold text-gray-700">
+                          {section.category}
                         </div>
-                        <ChevronRight size={16} className="text-gray-300 ml-2 flex-shrink-0" />
+                        <div className="p-2">
+                          {section.items.map((item, itemIdx) => {
+                            const isChecked = packingState[`${catIdx}-${itemIdx}`];
+                            return (
+                              <div 
+                                key={itemIdx} 
+                                onClick={() => togglePackingItem(catIdx, itemIdx)}
+                                className="flex items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                              >
+                                 {isChecked ? (
+                                     <CheckSquare size={20} className="text-blue-500 mr-3 flex-shrink-0" />
+                                 ) : (
+                                     <Square size={20} className="text-gray-300 mr-3 flex-shrink-0" />
+                                 )}
+                                 <span className={`font-medium ${isChecked ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                                     {item}
+                                 </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     ))}
                     <div className="h-20"></div>
@@ -559,24 +698,31 @@
               </div>
               
               {/* Bottom Nav */}
-              <div className="bg-white border-t border-gray-200 py-3 px-6 flex justify-between items-center text-xs text-gray-500">
+              <div className="bg-white border-t border-gray-200 py-3 px-2 flex justify-between items-center text-xs text-gray-500 flex-shrink-0">
                  <button 
                    onClick={() => setActiveTab('itinerary')}
-                   className={`flex flex-col items-center ${activeTab === 'itinerary' || activeTab === 'bucket' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                   className={`flex flex-col items-center w-1/4 ${activeTab === 'itinerary' || activeTab === 'bucket' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                  >
                    <Calendar size={20} />
                    <span className="mt-1">Trip</span>
                  </button>
                  <button 
-                   onClick={() => setActiveTab('map')}
-                   className={`flex flex-col items-center ${activeTab === 'map' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                   onClick={() => setActiveTab('packing')}
+                   className={`flex flex-col items-center w-1/4 ${activeTab === 'packing' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                  >
-                   <MapPin size={20} />
-                   <span className="mt-1">Map</span>
+                   <Briefcase size={20} />
+                   <span className="mt-1">Packing</span>
+                 </button>
+                 <button 
+                   onClick={() => setActiveTab('lingo')}
+                   className={`flex flex-col items-center w-1/4 ${activeTab === 'lingo' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                 >
+                   <MessageCircle size={20} />
+                   <span className="mt-1">Lingo</span>
                  </button>
                  <button 
                    onClick={() => setActiveTab('docs')}
-                   className={`flex flex-col items-center ${activeTab === 'docs' ? 'text-blue-600' : 'hover:text-blue-500'}`}
+                   className={`flex flex-col items-center w-1/4 ${activeTab === 'docs' ? 'text-blue-600' : 'hover:text-blue-500'}`}
                  >
                    <FileText size={20} />
                    <span className="mt-1">Docs</span>
